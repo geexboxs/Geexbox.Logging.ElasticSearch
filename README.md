@@ -78,6 +78,8 @@ public class Program
 
 Logs will look something like the following:
 
+![](doc/images/2020-08-08-01-46-05.png)
+
 ## Credits
 
 This provider is _heavily_ cribbed from the [Azure App Service Logging Provider](https://github.com/aspnet/logging/blob/dev/src/Microsoft.Extensions.Logging.AzureAppServices/Internal/BatchingLoggerProvider.cs) from the ASP.NET team.
