@@ -19,6 +19,7 @@
     <AssemblyName>Geexbox.Logging.ElasticSearch</AssemblyName>
     <PackageId>Geexbox.Logging.ElasticSearch</PackageId>
     <PackageTags>aspnetcore;logging;elasticsearch;provider</PackageTags>
+    <PackageIconUrl>https://avatars2.githubusercontent.com/u/34233029</PackageIconUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
