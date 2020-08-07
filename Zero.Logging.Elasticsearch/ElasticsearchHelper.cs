@@ -89,7 +89,7 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
                             return;
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         result = _client.Indices.PutTemplateForAll<DynamicResponse>(_templateName, GetTempatePostData());
 
