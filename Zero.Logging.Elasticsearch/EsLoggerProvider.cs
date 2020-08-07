@@ -16,11 +16,11 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
     [ProviderAlias("Elasticsearch")]
     public class EsLoggerProvider : BatchingLoggerProvider
     {
-        private readonly IHostingEnvironment _env;
+        private readonly IHostEnvironment _env;
         private static string _serverIp;
         private readonly ElasticsearchHelper _esHelper;
 
-        public EsLoggerProvider(IOptionsMonitor<EsLoggerOptions> options, IHostingEnvironment env) : base(options)
+        public EsLoggerProvider(IOptionsMonitor<EsLoggerOptions> options, IHostEnvironment env) : base(options)
         {
             _env = env;
             if (_serverIp == null)
@@ -29,6 +29,23 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
                 _serverIp = ipHost.AddressList.GetLocalIPv4().MapToIPv4().ToString();
             }
             var loggerOptions = options.CurrentValue;
+            if (!string.IsNullOrWhiteSpace(loggerOptions.TemplateName))
+            {
+                loggerOptions.AutoRegisterTemplate = true;
+            }
+            _esHelper = ElasticsearchHelper.Create(loggerOptions);
+            _esHelper.RegisterTemplateIfNeeded();
+        }
+
+        public EsLoggerProvider(EsLoggerOptions options, IHostEnvironment env) : base(options)
+        {
+            _env = env;
+            if (_serverIp == null)
+            {
+                IPHostEntry ipHost = Dns.GetHostEntry(Dns.GetHostName());
+                _serverIp = ipHost.AddressList.GetLocalIPv4().MapToIPv4().ToString();
+            }
+            var loggerOptions = options;
             if (!string.IsNullOrWhiteSpace(loggerOptions.TemplateName))
             {
                 loggerOptions.AutoRegisterTemplate = true;

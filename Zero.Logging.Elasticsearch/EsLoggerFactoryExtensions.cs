@@ -31,13 +31,14 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
         /// <param name="configure"></param>
         public static ILoggingBuilder AddElasticsearch(this ILoggingBuilder builder, Action<EsLoggerOptions> configure)
         {
+            builder.AddConfiguration();
             if (configure == null)
             {
                 throw new ArgumentNullException(nameof(configure));
             }
 
-            builder.AddElasticsearch();
             builder.Services.Configure(configure);
+            builder.AddElasticsearch();
             return builder;
         }
     }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+
 using Elasticsearch.Net;
+
 using GeexBox.ElasticSearch.Zero.Logging.Commom;
 
 namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
@@ -74,18 +76,35 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
 
             try
             {
+                DynamicResponse result;
                 if (!_options.OverwriteTemplate)
                 {
-                    var templateExistsResponse = _client.Indices.TemplateExistsForAll<DynamicResponse>(_templateName);
-                    if (templateExistsResponse.HttpStatusCode == 200)
+                    DynamicResponse templateExistsResponse;
+                    try
                     {
-                        TemplateRegistrationSuccess = true;
+                        templateExistsResponse = _client.Indices.TemplateExistsForAll<DynamicResponse>(_templateName);
+                        if (templateExistsResponse.HttpStatusCode == 200)
+                        {
+                            TemplateRegistrationSuccess = true;
+                            return;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        result = _client.Indices.PutTemplateForAll<DynamicResponse>(_templateName, GetTempatePostData());
 
-                        return;
+                        if (!result.Success)
+                        {
+                            ((IElasticsearchResponse)result).TryGetServerErrorReason(out var serverError);
+                            Console.WriteLine("Unable to create the template. {0}", serverError);
+                            TemplateRegistrationSuccess = false;
+                        }
+                        else
+                            TemplateRegistrationSuccess = true;
                     }
                 }
 
-                var result = _client.Indices.PutTemplateForAll<DynamicResponse>(_templateName, GetTempatePostData());
+                result = _client.Indices.PutTemplateForAll<DynamicResponse>(_templateName, GetTempatePostData());
 
                 if (!result.Success)
                 {
@@ -137,7 +156,6 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
                 settings.Add("number_of_replicas", _options.NumberOfReplicas.Value.ToString());
 
             return ElasticsearchTemplateProvider.GetTemplate(settings, _templateMatchString);
-
         }
     }
 }

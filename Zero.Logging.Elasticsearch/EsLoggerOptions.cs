@@ -11,8 +11,8 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
         public const string DefaultNode = "http://localhost:9200";
         public const string DefaultIndexFormat = "logstash-{0:yyyy.MM.dd}";
         public const string DefaultDeadLetterIndexName = "deadletter-{0:yyyy.MM.dd}";
-        public const string DefaultTypeName = "logmessage";
-        public const string DefaultTemplateName = "zero-logging-template";
+        public const string DefaultTypeName = "_doc";
+        public const string DefaultTemplateName = "geexbox-logging-template";
         public static readonly TimeSpan DefaultConnectionTimeout = TimeSpan.FromSeconds(60);
 
         /// <summary>

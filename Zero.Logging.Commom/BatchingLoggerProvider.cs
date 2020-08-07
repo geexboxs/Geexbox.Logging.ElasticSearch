@@ -42,6 +42,26 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Commom
             UpdateOptions(options.CurrentValue);
         }
 
+        protected BatchingLoggerProvider(BatchingLoggerOptions options)
+        {
+            // NOTE: Only IsEnabled is monitored
+
+            var loggerOptions = options;
+            if (loggerOptions.BatchSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(loggerOptions.BatchSize), $"{nameof(loggerOptions.BatchSize)} must be a positive number.");
+            }
+            if (loggerOptions.FlushPeriod <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(loggerOptions.FlushPeriod), $"{nameof(loggerOptions.FlushPeriod)} must be longer than zero.");
+            }
+
+            _interval = loggerOptions.FlushPeriod;
+            _batchSize = loggerOptions.BatchSize;
+            _queueSize = loggerOptions.BackgroundQueueSize;
+
+        }
+
         public bool IsEnabled { get; private set; }
 
         private void UpdateOptions(BatchingLoggerOptions options)

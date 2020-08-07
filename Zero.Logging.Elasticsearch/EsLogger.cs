@@ -1,7 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.ServiceModel.Channels;
 using GeexBox.ElasticSearch.Zero.Logging.Commom;
+using Geexbox.Logging.ElasticSearch.ZeroLoggingCommom;
 using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
 {
@@ -12,6 +18,19 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
         private readonly string _serviceName;
         private readonly string _serverIp;
         private readonly string _env;
+
+        private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings()
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            Error = (sender, args) => args.ErrorContext.Handled = true,
+            Formatting = Formatting.None,
+            MissingMemberHandling = MissingMemberHandling.Ignore,
+            ContractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy(),
+            },
+            NullValueHandling = NullValueHandling.Ignore
+        };
 
         public EsLogger(BatchingLoggerProvider loggerProvider, string categoryName, string env, string serviceName,
             string serverIp)
@@ -33,19 +52,51 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
             return _provider.IsEnabled;
         }
 
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception,
+            Func<TState, Exception, string> formatterOrDefaultMessage)
         {
-            Log(DateTimeOffset.Now, logLevel, eventId, state, exception, formatter);
+            Log(DateTimeOffset.Now, logLevel, eventId, state as object[], exception,
+                formatterOrDefaultMessage(state, exception));
         }
 
-        public void Log<TState>(DateTimeOffset timestamp, LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Log(DateTimeOffset timestamp, LogLevel logLevel, EventId eventId, object[] state,
+            Exception exception, string formatterOrDefaultMessage)
         {
-            var jsonData = new { timestamp = timestamp, level = logLevel.ToString(), env = _env, serviceName = _serviceName, serverIp = _serverIp, category = _category, eventId, message = formatter(state, exception), exceptions = new List<ExceptionModel>() };
+            var jsonData = new Dictionary<string, object>()
+            {
+                {"timestamp", timestamp},
+                {"level", logLevel.ToString()},
+                {"env", _env},
+                {"serviceName", _serviceName},
+                {"serverIp", _serverIp},
+                {"category", _category},
+                {"eventId", eventId},
+                {"message", formatterOrDefaultMessage},
+            };
             if (exception != null)
             {
-                WriteSingleException(jsonData.exceptions, exception, 0);
+                jsonData["exceptions"] = new List<ExceptionModel>();
+                WriteException(jsonData["exceptions"] as List<ExceptionModel>, exception, 0);
             }
-            _provider.AddMessage(timestamp, Newtonsoft.Json.JsonConvert.SerializeObject(jsonData));
+
+            if (eventId == GeexboxEventId.RemoteEndPointRequest)
+            {
+                jsonData["request"] = state.FirstOrDefault();
+            }
+            else if (eventId == GeexboxEventId.RemoteEndPointResponse)
+            {
+                jsonData["response"] = state.FirstOrDefault();
+            }
+            else if (eventId == GeexboxEventId.AuditLog)
+            {
+                jsonData["auditInfo"] = state.FirstOrDefault();
+            }
+            else
+            {
+                jsonData["data"] = state;
+            }
+
+            _provider.AddMessage(timestamp, Newtonsoft.Json.JsonConvert.SerializeObject(jsonData, _serializerSettings));
         }
 
         private void WriteException(List<ExceptionModel> exceptionList, Exception exception, int depth)
@@ -55,7 +106,7 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
                 WriteException(exceptionList, exception.InnerException, ++depth);
         }
 
-        private void WriteSingleException(dynamic exceptionList, Exception exception, int depth)
+        private void WriteSingleException(List<ExceptionModel> exceptionList, Exception exception, int depth)
         {
             exceptionList.Add(new ExceptionModel
             {
@@ -64,7 +115,6 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
                 source = exception.Source,
                 stackTrace = exception.StackTrace,
                 hResult = exception.HResult,
-                helpLink = exception.HelpLink
             });
         }
 
@@ -75,7 +125,7 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
             public string source { get; set; }
             public string stackTrace { get; set; }
             public int hResult { get; set; }
-            public string helpLink { get; set; }
         }
     }
 }
+
