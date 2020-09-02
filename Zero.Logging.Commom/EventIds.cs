@@ -40,6 +40,14 @@ namespace Geexbox.Logging.ElasticSearch.ZeroLoggingCommom
             }
         }
 
+        public static EventId ExceptionFilter
+        {
+            get
+            {
+                return new GeexboxEventId(new EventId(nameof(ExceptionFilter).GetHashCode(), nameof(ExceptionFilter)));
+            }
+        }
+
         public override string ToString()
         {
             return val.ToString();
