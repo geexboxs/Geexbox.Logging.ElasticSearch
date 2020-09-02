@@ -48,6 +48,14 @@ namespace Geexbox.Logging.ElasticSearch.ZeroLoggingCommom
             }
         }
 
+        public static EventId BackgroundExceptionFilter
+        {
+            get
+            {
+                return new GeexboxEventId(new EventId(nameof(BackgroundExceptionFilter).GetHashCode(), nameof(BackgroundExceptionFilter)));
+            }
+        }
+
         public override string ToString()
         {
             return val.ToString();
