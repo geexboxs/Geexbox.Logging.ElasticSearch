@@ -32,7 +32,7 @@ namespace Geexbox.Logging.ElasticSearch.ZeroLoggingCommom
             }
         }
 
-        public static EventId AuditLog
+        public static GeexboxEventId AuditLog
         {
             get
             {
@@ -40,7 +40,7 @@ namespace Geexbox.Logging.ElasticSearch.ZeroLoggingCommom
             }
         }
 
-        public static EventId ExceptionFilter
+        public static GeexboxEventId ExceptionFilter
         {
             get
             {
@@ -48,7 +48,7 @@ namespace Geexbox.Logging.ElasticSearch.ZeroLoggingCommom
             }
         }
 
-        public static EventId BackgroundExceptionFilter
+        public static GeexboxEventId BackgroundExceptionFilter
         {
             get
             {
