@@ -7,53 +7,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Geexbox.Logging.ElasticSearch.ZeroLoggingCommom
 {
-    public struct GeexboxEventId
+    public class GeexboxEventId
     {
         public EventId val;
 
         public GeexboxEventId(EventId eventId)
         {
             this.val = eventId;
-        }
-
-        public static GeexboxEventId RemoteEndPointRequest
-        {
-            get
-            {
-                return new GeexboxEventId(new EventId(nameof(RemoteEndPointRequest).GetHashCode(), nameof(RemoteEndPointRequest)));
-            }
-        }
-
-        public static GeexboxEventId RemoteEndPointResponse
-        {
-            get
-            {
-                return new GeexboxEventId(new EventId(nameof(RemoteEndPointResponse).GetHashCode(), nameof(RemoteEndPointResponse)));
-            }
-        }
-
-        public static GeexboxEventId AuditLog
-        {
-            get
-            {
-                return new GeexboxEventId(new EventId(nameof(AuditLog).GetHashCode(), nameof(AuditLog)));
-            }
-        }
-
-        public static GeexboxEventId ExceptionFilter
-        {
-            get
-            {
-                return new GeexboxEventId(new EventId(nameof(ExceptionFilter).GetHashCode(), nameof(ExceptionFilter)));
-            }
-        }
-
-        public static GeexboxEventId BackgroundExceptionFilter
-        {
-            get
-            {
-                return new GeexboxEventId(new EventId(nameof(BackgroundExceptionFilter).GetHashCode(), nameof(BackgroundExceptionFilter)));
-            }
         }
 
         public override string ToString()

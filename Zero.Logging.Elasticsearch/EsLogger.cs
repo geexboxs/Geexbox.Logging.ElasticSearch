@@ -79,21 +79,9 @@ namespace GeexBox.ElasticSearch.Zero.Logging.Elasticsearch
                 WriteException(jsonData["exceptions"] as List<ExceptionModel>, exception, 0);
             }
 
-            if (eventId == GeexboxEventId.RemoteEndPointRequest)
+            if (state != default)
             {
-                jsonData["request"] = state.FirstOrDefault();
-            }
-            else if (eventId == GeexboxEventId.RemoteEndPointResponse)
-            {
-                jsonData["response"] = state.FirstOrDefault();
-            }
-            else if (eventId == GeexboxEventId.AuditLog)
-            {
-                jsonData["auditInfo"] = state.FirstOrDefault();
-            }
-            else
-            {
-                jsonData["data"] = state;
+                jsonData["data"] = state.FirstOrDefault();
             }
 
             _provider.AddMessage(timestamp, Newtonsoft.Json.JsonConvert.SerializeObject(jsonData, _serializerSettings));
